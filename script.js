@@ -1,52 +1,71 @@
-window.addEventListener('scroll', function() {
-    var navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) { // Adjust scroll threshold as needed
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-});
+// Carousel for Clients Section
+let slideIndex = 0;
+showSlides();
 
+function showSlides() {
+    let slides = document.getElementsByClassName("carousel-item");
+    let dots = document.getElementsByClassName("dot");
 
-/*clients Section*/
-let currentIndex = 1;
-const items = document.querySelectorAll('.carousel-item');
-const dots = document.querySelectorAll('.dot');
-const totalItems = items.length;
-const carouselInner = document.querySelector('.carousel-inner');
-
-// Initial setup: show the first actual item
-showSlide(currentIndex);
-
-function showSlide(index) {
-    if (index >= totalItems - 1) {
-        currentIndex = 1; // Loop back to the first item
-        carouselInner.style.transition = 'none'; // Disable transition for immediate effect
-    } else if (index <= 0) {
-        currentIndex = totalItems - 2; // Loop to the last real item
-        carouselInner.style.transition = 'none';
-    } else {
-        carouselInner.style.transition = 'transform 0.5s ease-in-out'; // Normal transition
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
     }
 
-    carouselInner.style.transform = `translateX(-${currentIndex * 100}%)`;
+    slideIndex++;
+    if (slideIndex > slides.length) { slideIndex = 1 }
 
-    // Reset dots
-    dots.forEach(dot => dot.classList.remove('active'));
-    dots[(currentIndex - 1) % dots.length].classList.add('active');
-}
+    for (let i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active", "");
+    }
 
-function nextSlide() {
-    currentIndex++;
-    showSlide(currentIndex);
-}
-
-function prevSlide() {
-    currentIndex--;
-    showSlide(currentIndex);
+    slides[slideIndex - 1].style.display = "block";
+    dots[slideIndex - 1].className += " active";
+    setTimeout(showSlides, 4000); // Change image every 4 seconds
 }
 
 function currentSlide(n) {
-    currentIndex = n + 1; // Since we have duplicated items, account for index offset
-    showSlide(currentIndex);
+    slideIndex = n;
+    showSlides();
 }
+
+function prevSlide() {
+    slideIndex -= 2;
+    if (slideIndex < 0) slideIndex = 0;
+    showSlides();
+}
+
+function nextSlide() {
+    showSlides();
+}
+
+// Smooth Scrolling for Anchor Links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
+// Fade-in Effect on Scroll
+const fadeIns = document.querySelectorAll('.about, .projects, .clients, .contacts');
+
+const fadeInOptions = {
+    threshold: 0.3,
+    rootMargin: "0px 0px -100px 0px"
+};
+
+const fadeInOnScroll = new IntersectionObserver(function(entries, fadeInOnScroll) {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+            return;
+        } else {
+            entry.target.classList.add('fade-in');
+            fadeInOnScroll.unobserve(entry.target);
+        }
+    });
+}, fadeInOptions);
+
+fadeIns.forEach(fadeIn => {
+    fadeInOnScroll.observe(fadeIn);
+});
